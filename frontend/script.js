@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,8 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     newChatButton = document.getElementById('newChatButton');
+    themeToggle = document.getElementById('themeToggle');
     
     setupEventListeners();
+    initializeTheme();
     createNewSession();
     loadCourseStats();
 });
@@ -33,6 +35,11 @@ function setupEventListeners() {
     // New Chat button
     if (newChatButton) {
         newChatButton.addEventListener('click', createNewSession);
+    }
+    
+    // Theme toggle button
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
     }
     
     // Suggested questions
@@ -191,6 +198,47 @@ async function loadCourseStats() {
         }
         if (courseTitles) {
             courseTitles.innerHTML = '<span class="error">Failed to load courses</span>';
+        }
+    }
+}
+
+// Theme Management Functions
+function initializeTheme() {
+    // Check if user has a saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Use saved theme or system preference (default to dark)
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    setTheme(theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    setTheme(newTheme);
+}
+
+function setTheme(theme) {
+    // Update the data-theme attribute on the html element
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Save theme preference
+    localStorage.setItem('theme', theme);
+    
+    // Update theme toggle button icon
+    if (themeToggle) {
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+        if (themeIcon) {
+            themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            themeIcon.style.transform = 'rotate(360deg)';
+            
+            // Reset rotation after animation
+            setTimeout(() => {
+                themeIcon.style.transform = 'rotate(0deg)';
+            }, 500);
         }
     }
 }
